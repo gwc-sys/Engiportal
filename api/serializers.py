@@ -2,16 +2,23 @@ from rest_framework import serializers
 from .models import Resource, Document
 
 class DocumentSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = Document
-        fields = ['id', 'name', 'file', 'uploaded_at']
-        read_only_fields = ['uploaded_at']
-
+        fields = ['id', 'name', 'file', 'public_id', 'resource_type', 'uploaded_at', 'file_url']
+        read_only_fields = ['public_id', 'resource_type', 'uploaded_at', 'file_url']
+    
+    def get_file_url(self, obj):
+        return obj.file.url if obj.file else None
+    
     def validate_file(self, value):
-        valid_extensions = ['pdf', 'docx', 'pptx', 'txt']
+        valid_extensions = ['pdf', 'doc', 'docx', 'txt', 'ppt', 'pptx']
         extension = value.name.split('.')[-1].lower()
         if extension not in valid_extensions:
-            raise serializers.ValidationError(f"File type not supported. Allowed: {', '.join(valid_extensions)}")
+            raise serializers.ValidationError(
+                f"Unsupported file type. Allowed: {', '.join(valid_extensions)}"
+            )
         return value
 
     def to_internal_value(self, data):

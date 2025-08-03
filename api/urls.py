@@ -5,8 +5,6 @@ from .views import ResourceListCreateView, FileUploadView, ResourceUploadView  #
 
 urlpatterns = [
     path('resources/', ResourceListCreateView.as_view()),
-    path('documents/', FileUploadView.as_view()),  # Allow GET for documents
-    path('resources/upload/', ResourceUploadView.as_view(), name='resource-upload'),  # Existing route
-]
-
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path('upload/file/', FileUploadView.as_view()),
+    path('upload/resource/', ResourceUploadView.as_view()),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

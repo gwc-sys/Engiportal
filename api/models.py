@@ -14,7 +14,9 @@ class Resource(models.Model):
 
 class Document(models.Model):
     name = models.CharField(max_length=255)
-    file = models.FileField(upload_to='pdfs/', storage=RawMediaCloudinaryStorage())
+    file = models.FileField(upload_to='documents/', storage=RawMediaCloudinaryStorage())
+    public_id = models.CharField(max_length=255, blank=True)  # Add this
+    resource_type = models.CharField(max_length=50, blank=True)  # Add this
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

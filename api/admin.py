@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 class YourModel(models.Model):
     name = models.CharField(max_length=100)
@@ -22,3 +23,11 @@ class RelatedModel(models.Model):
     class Meta:
         verbose_name = "Related Item"
         verbose_name_plural = "Related Items"
+
+@admin.register(YourModel)
+class YourModelAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'created_at', 'is_active')
+
+@admin.register(RelatedModel)
+class RelatedModelAdmin(admin.ModelAdmin):
+    list_display = ('title', 'your_model', 'created_at')
