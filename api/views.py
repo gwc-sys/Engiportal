@@ -7,6 +7,9 @@ from .models import Resource, Document
 from .serializers import ResourceSerializer, DocumentSerializer
 import logging
 import cloudinary.uploader
+import cloudinary.api
+from django.shortcuts import get_object_or_404
+import hashlib
 
 class ResourceListCreateView(generics.ListCreateAPIView):
     queryset = Resource.objects.all().order_by('-upload_date')
@@ -27,7 +30,8 @@ class FileUploadView(APIView):
             upload_result = cloudinary.uploader.upload(
                 request.FILES['file'],
                 resource_type='auto',
-                folder='documents/'
+                folder='documents/',
+                public_id=request.FILES['file'].name.rsplit('.', 1)[0]  # Use original filename without extension
             )
 
             # Create Document instance
@@ -49,32 +53,79 @@ class FileUploadView(APIView):
             )
 
 class ResourceUploadView(APIView):
-    parser_classes = [MultiPartParser]
-
-    def post(self, request, format=None):
+    parser_classes = (MultiPartParser,)
+    
+    def post(self, request):
         try:
-            # First upload the file
-            file_view = FileUploadView()
-            file_response = file_view.post(request)
-            
-            if file_response.status_code != status.HTTP_201_CREATED:
-                return file_response
+            # Get the uploaded file
+            file = request.FILES['file']
 
-            # Create the Resource
-            document_id = file_response.data['id']
-            resource = Resource.objects.create(
-                title=request.data.get('title', 'Untitled'),
-                description=request.data.get('description', ''),
-                branch=request.data.get('branch', ''),
-                document_id=document_id
+            # Calculate checksum (SHA256)
+            sha256 = hashlib.sha256()
+            for chunk in file.chunks():
+                sha256.update(chunk)
+            checksum = sha256.hexdigest()
+            file.seek(0)  # Reset file pointer after reading
+
+            # Upload to Cloudinary
+            cloudinary_response = cloudinary.uploader.upload(
+                file,
+                folder="resources/",
+                resource_type="auto",
+                public_id=file.name.rsplit('.', 1)[0]  # Use original filename without extension
             )
-
-            serializer = ResourceSerializer(resource)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+            
+            # Create resource in your database
+            resource = Resource.objects.create(
+                title=request.data['title'],
+                description=request.data['description'],
+                college=request.data['college'],
+                branch=request.data['branch'],
+                resource_type=request.data['resource_type'],
+                file_url=cloudinary_response['secure_url'],
+                file_type=file.name.split('.')[-1].lower(),
+                size=file.size,
+                # Add checksum field if your model supports it
+                checksum=checksum
+            )
+            
+            # Optionally, update Cloudinary credentials here if needed (usually not required per request)
+            
+            return Response({
+                'id': resource.id,
+                'title': resource.title,
+                'file_url': resource.file_url,
+                'checksum': checksum,
+                # Include other fields as needed
+            }, status=status.HTTP_201_CREATED)
+            
         except Exception as e:
-            logging.error(f"Resource creation error: {str(e)}")
             return Response(
-                {"error": "Resource creation failed", "details": str(e)},
+                {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+class DocumentDetailView(APIView):
+    def get(self, request, pk, format=None):
+        try:
+            # Try to get by public_id first
+            try:
+                document = Document.objects.get(public_id=pk)
+            except Document.DoesNotExist:
+                # If not found, try by file name
+                document = Document.objects.get(file__icontains=pk)
+
+            cloudinary_resource = cloudinary.api.resource(document.public_id)
+            serializer = DocumentSerializer(document)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logging.error(f"Document retrieval error: {str(e)}")
+            return Response(
+                {"error": "Document retrieval failed", "details": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class DocumentListView(generics.ListAPIView):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
