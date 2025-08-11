@@ -129,8 +129,6 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # For production (specific domain)
 ALLOWED_HOSTS = ['engiportal.onrender.com']
 
-# For development (less secure)
-ALLOWED_HOSTS = ['*']  # Allows all hosts (not recommended for production)
 
 # Recommended approach for Render.com deployments
 ALLOWED_HOSTS = [
@@ -144,15 +142,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    # Add other origins as needed
     "http://localhost:5174",
-
-    'engiportal.onrender.com',
-    'localhost',
-    '127.0.0.1',
-    '*' ,
     "https://engisolution.onrender.com",
     "http://localhost:5173",   
+    "http://127.0.0.1",        
+    "http://localhost",        
+    "https://engiportal.onrender.com",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://engisolution.onrender.com",
