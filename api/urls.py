@@ -4,8 +4,7 @@ from django.urls import path
 from .views import ResourceListCreateView, FileUploadView, DocumentDetailView # Add ResourceUploadView
 
 urlpatterns = [
-    path('resources/', ResourceListCreateView.as_view()),
+    # path('resources/', ResourceListCreateView.as_view()),
     path('upload/', FileUploadView.as_view()),
-    # path('upload/', ResourceUploadView.as_view()),
-    path('documents/', DocumentDetailView.as_view()),  
+    path('documents/<str:pk>/', DocumentDetailView.as_view()),  
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
