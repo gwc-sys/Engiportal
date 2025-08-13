@@ -66,8 +66,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'myengiportaldb',    # Database name
+        'USER': 'gwc_sys',           # MySQL username
+        'PASSWORD': '*admin###',     # MySQL password
+        'HOST': 'localhost',         # Database host
+        'PORT': '3306',              # Default MySQL port
     }
 }
 
@@ -89,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+    
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
