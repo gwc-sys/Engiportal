@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import mysql.connector
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -64,17 +65,35 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'myengiportaldb',    # Database name
+#         'USER': 'gwc_sys',           # MySQL username
+#         'PASSWORD': '*admin###',     # MySQL password
+#         'HOST': 'localhost',         # Database host
+#         'PORT': '3306',              # Default MySQL port
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'myengiportaldb',    # Database name
-        'USER': 'gwc_sys',           # MySQL username
-        'PASSWORD': '*admin###',     # MySQL password
-        'HOST': 'localhost',         # Database host
-        'PORT': '3306',              # Default MySQL port
+        'USER': 'engisolution',           # MySQL username
+        'PASSWORD': 'N!uos0G375',     # MySQL password
+        'HOST': 'engisolution.mysql.database.azure.com', # Database host
+        'PORT': '3306' ,         # Default MySQL port
+        'OPTIONS': {
+            'ssl': {
+                'ssl_ca': "django_backend/certs/DigiCertGlobalRootCA.crt.pem",
+                'ssl-mode': 'REQUIRED'
+            },
+            'connect_timeout': 30, 
+        }
     }
+    
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -193,3 +212,13 @@ LOGGING = {
 # File upload size limits
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
+
+# cnx = mysql.connector.connect(
+#     user="gwc_sys@engiportal",  # Note the @engiportal for Azure
+#     password="r$F#%%aBfbK#$DXX-d$5",
+#     host="engiportal.mysql.database.azure.com",
+#     port=3306,
+#     database="myengiportaldb",
+#     ssl_ca="django_backend/certs/DigiCertGlobalRootCA.crt.pem django_backend/certs/DigiCertGlobalRootG2.crt.pem",
+#     ssl_disabled=False
+# )
